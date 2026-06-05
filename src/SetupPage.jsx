@@ -87,10 +87,11 @@ export default function SetupPage() {
           <h2>步驟說明</h2>
           <ol>
             <li>
-              開啟 <strong>Google 表單</strong>，新增 4 個「簡答」欄位，依序命名：
+              開啟 <strong>Google 表單</strong>，新增 4 個欄位，類型全選<strong>「簡答」</strong>，依序命名：
               <ul>
                 {FIELD_ORDER.map((f) => <li key={f}><code>{f}</code></li>)}
               </ul>
+              （注意：Timestamp 也要選簡答，不能選時間類型）
             </li>
             <li>發佈表單，確認已開啟<strong>接受回覆</strong></li>
             <li>在編輯頁面右上角點 <strong>⋮（三個點）</strong>，選「<strong>取得預先填入的連結</strong>」</li>
