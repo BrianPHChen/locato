@@ -3,9 +3,39 @@ import liff from '@line/liff'
 
 export default function CheckinPage({ profile, config, configParam }) {
   const [location, setLocation] = useState('')
+  const [manualUserId, setManualUserId] = useState('')
+  const [manualUsername, setManualUsername] = useState('')
   const [status, setStatus] = useState('idle') // idle | submitting | success | error
 
   const isLoggedIn = !!profile
+
+  function submitViaIframe(actionUrl, fields) {
+    const iframe = document.createElement('iframe')
+    iframe.name = 'form-target'
+    iframe.style.display = 'none'
+    document.body.appendChild(iframe)
+
+    const form = document.createElement('form')
+    form.action = actionUrl
+    form.method = 'POST'
+    form.target = 'form-target'
+
+    Object.entries(fields).forEach(([name, value]) => {
+      const input = document.createElement('input')
+      input.type = 'hidden'
+      input.name = name
+      input.value = value
+      form.appendChild(input)
+    })
+
+    document.body.appendChild(form)
+    form.submit()
+
+    setTimeout(() => {
+      document.body.removeChild(form)
+      document.body.removeChild(iframe)
+    }, 3000)
+  }
 
   function handleLogin() {
     liff.login({ redirectUri: window.location.href })
@@ -20,18 +50,19 @@ export default function CheckinPage({ profile, config, configParam }) {
       hour: '2-digit', minute: '2-digit', second: '2-digit',
     })
 
-    const formData = new FormData()
-    formData.append(config.entryUserId, profile.userId)
-    formData.append(config.entryUsername, profile.displayName)
-    formData.append(config.entryTime, now)
-    formData.append(config.entryLocation, location.trim())
+    const fields = {
+      [config.entryUserId]: profile?.userId ?? manualUserId,
+      [config.entryUsername]: profile?.displayName ?? manualUsername,
+      [config.entryTime]: now,
+      [config.entryLocation]: location.trim(),
+      fvv: '1',
+      pageHistory: '0',
+    }
+
+    console.log('Submitting to:', config.actionUrl, fields)
 
     try {
-      await fetch(config.actionUrl, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: formData,
-      })
+      submitViaIframe(config.actionUrl, fields)
       setStatus('success')
     } catch {
       setStatus('error')
@@ -71,38 +102,55 @@ export default function CheckinPage({ profile, config, configParam }) {
         {config.eventName && <p className="event-name">{config.eventName}</p>}
         <h1>{isLoggedIn ? `Hi, ${profile.displayName}` : '打卡活動'}</h1>
 
-        {isLoggedIn ? (
+        {!isLoggedIn && (
           <>
             <div className="field">
-              <label>你在哪裡？</label>
+              <label>User ID（測試用）</label>
               <input
                 type="text"
-                value={location}
-                onChange={(e) => setLocation(e.target.value)}
-                placeholder="例如：台北辦公室、B1 會議室"
-                disabled={status === 'submitting'}
+                value={manualUserId}
+                onChange={(e) => setManualUserId(e.target.value)}
+                placeholder="任意填入"
               />
             </div>
-
-            {status === 'error' && (
-              <p className="error">送出失敗，請確認網路連線後再試</p>
-            )}
-
-            <button
-              className="btn-checkin"
-              onClick={handleCheckin}
-              disabled={!location.trim() || status === 'submitting'}
-            >
-              {status === 'submitting' ? '打卡中...' : 'Check In'}
-            </button>
-
-            <button className="btn-share" onClick={handleShare}>
-              分享打卡連結給朋友
-            </button>
+            <div className="field">
+              <label>Username（測試用）</label>
+              <input
+                type="text"
+                value={manualUsername}
+                onChange={(e) => setManualUsername(e.target.value)}
+                placeholder="任意填入"
+              />
+            </div>
           </>
-        ) : (
-          <button className="btn-primary" onClick={handleLogin}>
-            使用 LINE 登入以打卡
+        )}
+
+        <div className="field">
+          <label>Location</label>
+          <input
+            type="text"
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
+            placeholder="例如：台北辦公室、B1 會議室"
+            disabled={status === 'submitting'}
+          />
+        </div>
+
+        {status === 'error' && (
+          <p className="error">送出失敗，請確認網路連線後再試</p>
+        )}
+
+        <button
+          className="btn-checkin"
+          onClick={handleCheckin}
+          disabled={!location.trim() || status === 'submitting'}
+        >
+          {status === 'submitting' ? '打卡中...' : 'Check In'}
+        </button>
+
+        {isLoggedIn && (
+          <button className="btn-share" onClick={handleShare}>
+            分享打卡連結給朋友
           </button>
         )}
       </div>
