@@ -8,39 +8,37 @@ const LIFF_ID = import.meta.env.VITE_LIFF_ID
 
 export default function App() {
   const [profile, setProfile] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [liffReady, setLiffReady] = useState(false)
+
+  const params = new URLSearchParams(window.location.search)
+  const configParam = params.get('c')
 
   useEffect(() => {
     liff
       .init({ liffId: LIFF_ID })
       .then(() => {
-        if (!liff.isLoggedIn()) {
-          liff.login({ redirectUri: window.location.href })
-          return
+        if (liff.isLoggedIn()) {
+          return liff.getProfile()
         }
-        return liff.getProfile()
+        return null
       })
       .then((p) => p && setProfile(p))
-      .catch((e) => setError(e.message))
-      .finally(() => setLoading(false))
+      .catch((e) => console.warn('LIFF init failed:', e))
+      .finally(() => setLiffReady(true))
   }, [])
 
-  if (loading) return <div className="screen-center">載入中...</div>
-  if (error) return <div className="screen-center error">{error}</div>
+  // SetupPage doesn't need LIFF at all — show immediately
+  if (!configParam) return <SetupPage />
 
-  const params = new URLSearchParams(window.location.search)
-  const configParam = params.get('c')
+  // CheckinPage waits for LIFF init to know login state
+  if (!liffReady) return <div className="screen-center">載入中...</div>
 
-  if (configParam) {
-    let config
-    try {
-      config = JSON.parse(atob(configParam))
-    } catch {
-      return <div className="screen-center error">連結無效，請重新取得</div>
-    }
-    return <CheckinPage profile={profile} config={config} configParam={configParam} />
+  let config
+  try {
+    config = JSON.parse(atob(configParam))
+  } catch {
+    return <div className="screen-center error">連結無效，請重新取得</div>
   }
 
-  return <SetupPage />
+  return <CheckinPage profile={profile} config={config} configParam={configParam} />
 }
