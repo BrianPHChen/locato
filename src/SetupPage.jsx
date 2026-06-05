@@ -92,9 +92,10 @@ export default function SetupPage() {
                 {FIELD_ORDER.map((f) => <li key={f}><code>{f}</code></li>)}
               </ul>
             </li>
-            <li>點右上角 <strong>⋮ → 取得預先填入的連結</strong></li>
-            <li>每個欄位隨便填入一個值，再點「取得連結」</li>
-            <li>複製產生的連結，貼到下方</li>
+            <li>發佈表單，確認已開啟<strong>接受回覆</strong></li>
+            <li>在編輯頁面右上角點 <strong>⋮（三個點）</strong>，選「<strong>取得預先填入的連結</strong>」</li>
+            <li>每個欄位隨便填入一個值，點「取得連結」後複製該連結</li>
+            <li>將連結貼到下方</li>
           </ol>
         </section>
 

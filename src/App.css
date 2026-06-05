@@ -216,8 +216,8 @@ input:disabled {
 }
 
 .btn-secondary {
-  background: #f0f0f0;
-  color: #333;
+  background: #222;
+  color: #fff;
 }
 
 .btn-line {
@@ -226,8 +226,8 @@ input:disabled {
 }
 
 .btn-share {
-  background: #f0f0f0;
-  color: #555;
+  background: #222;
+  color: #fff;
   font-size: 0.9rem;
 }
 
