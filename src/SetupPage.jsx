@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import liff from '@line/liff'
 
-const FIELD_ORDER = ['User ID', 'Username', '時間', '地點']
+const FIELD_ORDER = ['User ID', 'Username', 'Timestamp', 'Location']
 const ENTRY_KEYS = ['entryUserId', 'entryUsername', 'entryTime', 'entryLocation']
 
 function parsePrefillUrl(rawUrl) {
