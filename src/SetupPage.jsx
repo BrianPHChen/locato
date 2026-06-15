@@ -24,7 +24,8 @@ function parsePrefillUrl(rawUrl) {
 }
 
 function extractSheetId(url) {
-  const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)
+  // Handles both /d/SHEET_ID/edit and /d/e/PUBLISHED_ID/pubhtml
+  const match = url.match(/\/spreadsheets\/d\/(?:e\/)?([a-zA-Z0-9-_]{10,})/)
   return match?.[1] ?? null
 }
 

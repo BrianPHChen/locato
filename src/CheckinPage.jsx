@@ -2,7 +2,10 @@ import { useState, useEffect, useCallback } from 'react'
 import liff from '@line/liff'
 
 async function fetchCheckins(sheetId) {
-  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`
+  const isPublishedId = sheetId.startsWith('2PACX')
+  const path = isPublishedId ? `d/e/${sheetId}` : `d/${sheetId}`
+  const url = `https://docs.google.com/spreadsheets/${path}/gviz/tq?tqx=out:json`
+  console.log('Fetching feed:', url)
   const res = await fetch(url)
   const text = await res.text()
   const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1])
@@ -38,6 +41,7 @@ export default function CheckinPage({ profile, config, configParam }) {
       const data = await fetchCheckins(config.sheetId)
       setCheckins(data)
     } catch (e) {
+      console.error('Feed error:', e)
       setFeedError('無法載入動態，請確認試算表已發佈到網路')
     } finally {
       setFeedLoading(false)
