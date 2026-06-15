@@ -8,13 +8,13 @@ async function fetchCheckins(sheetId) {
   const text = await res.text()
   const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1])
 
-  const cols = json.table.cols.map((c) => c.label)
+  const cols = json.table.cols.map((c) => c.label.trim())
   const rows = json.table.rows ?? []
 
   return rows
     .map((row) => {
       const entry = {}
-      row.c.forEach((cell, i) => { entry[cols[i]] = cell?.v ?? cell?.f ?? '' })
+      row.c.forEach((cell, i) => { entry[cols[i]] = cell?.f ?? cell?.v ?? '' })
       return entry
     })
     .reverse() // newest first
@@ -228,9 +228,9 @@ export default function CheckinPage({ profile, config, configParam }) {
           <ul className="feed-list">
             {checkins.map((row, i) => (
               <li key={i} className="feed-item">
-                <span className="feed-name">{row['Username'] || row['username'] || '—'}</span>
-                <span className="feed-location">{row['Location'] || row['location'] || '—'}</span>
-                <span className="feed-time">{row['Timestamp'] || row['timestamp'] || row['時間戳記'] || ''}</span>
+                <span className="feed-name">{row['Username'] || '—'}</span>
+                <span className="feed-location">{row['Location'] || '—'}</span>
+                <span className="feed-time">{row['時間戳記'] || row['Timestamp'] || row['Time'] || ''}</span>
               </li>
             ))}
           </ul>
