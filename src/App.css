@@ -322,6 +322,41 @@ button:not(:disabled):active {
   font-weight: 600;
 }
 
+.divider {
+  text-align: center;
+  color: #aaa;
+  font-size: 0.85rem;
+  margin: 16px 0;
+  position: relative;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 42%;
+  height: 1px;
+  background: #e0e0e0;
+}
+
+.divider::before { left: 0; }
+.divider::after { right: 0; }
+
+.info-box {
+  background: #f0faf3;
+  border: 1.5px solid #06c755;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 16px;
+  font-size: 0.88rem;
+}
+
+.info-box a {
+  color: #06c755;
+  font-weight: 600;
+}
+
 .field-hint {
   font-size: 0.78rem;
   color: #999;
