@@ -2,9 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import liff from '@line/liff'
 
 async function fetchCheckins(sheetId) {
-  const isPublishedId = sheetId.startsWith('2PACX')
-  const path = isPublishedId ? `d/e/${sheetId}` : `d/${sheetId}`
-  const url = `https://docs.google.com/spreadsheets/${path}/gviz/tq?tqx=out:json`
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`
   console.log('Fetching feed:', url)
   const res = await fetch(url)
   const text = await res.text()

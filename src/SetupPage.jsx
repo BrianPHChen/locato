@@ -53,6 +53,7 @@ export default function SetupPage() {
   function handleGenerate() {
     if (!parsed) return
     const sheetId = sheetUrl.trim() ? extractSheetId(sheetUrl.trim()) : null
+    console.log('Extracted sheetId:', sheetId)
     const config = {
       actionUrl: parsed.actionUrl,
       entryUserId: parsed.entries[0],
@@ -149,7 +150,7 @@ export default function SetupPage() {
                 onChange={(e) => setSheetUrl(e.target.value)}
                 placeholder="https://docs.google.com/spreadsheets/d/..."
               />
-              <p className="field-hint">需先將試算表「發佈到網路」才能讀取資料</p>
+              <p className="field-hint">貼一般的編輯 URL（/spreadsheets/d/...），並將 Sheet 共享設為「任何人可檢視」</p>
             </div>
 
             <button className="btn-primary" onClick={handleGenerate}>
