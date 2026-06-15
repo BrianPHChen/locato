@@ -55,6 +55,10 @@ export default function SetupPage() {
         ],
       })
       setAutoEditUrl(params.get('autoEditUrl'))
+      const sheetId = params.get('autoSheetId')
+      if (sheetId) {
+        setSheetUrl(`https://docs.google.com/spreadsheets/d/${sheetId}/edit`)
+      }
       window.history.replaceState({}, '', window.location.pathname)
     }
   }, [])
