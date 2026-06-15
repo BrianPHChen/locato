@@ -61,7 +61,7 @@ export default function SetupPage() {
       eventName: eventName.trim(),
       ...(sheetId && { sheetId }),
     }
-    const encoded = btoa(JSON.stringify(config))
+    const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(config))))
     const base = `${window.location.origin}${window.location.pathname}`
     setShareUrl(`${base}?c=${encoded}`)
   }

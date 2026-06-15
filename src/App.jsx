@@ -35,7 +35,7 @@ export default function App() {
 
   let config
   try {
-    config = JSON.parse(atob(configParam))
+    config = JSON.parse(decodeURIComponent(escape(atob(configParam))))
   } catch {
     return <div className="screen-center error">連結無效，請重新取得</div>
   }
