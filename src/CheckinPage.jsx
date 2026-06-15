@@ -1,13 +1,54 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import liff from '@line/liff'
+
+async function fetchCheckins(sheetId) {
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`
+  const res = await fetch(url)
+  const text = await res.text()
+  const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\)/)[1])
+
+  const cols = json.table.cols.map((c) => c.label)
+  const rows = json.table.rows ?? []
+
+  return rows
+    .map((row) => {
+      const entry = {}
+      row.c.forEach((cell, i) => { entry[cols[i]] = cell?.v ?? cell?.f ?? '' })
+      return entry
+    })
+    .reverse() // newest first
+}
 
 export default function CheckinPage({ profile, config, configParam }) {
   const [location, setLocation] = useState('')
   const [manualUserId, setManualUserId] = useState('')
   const [manualUsername, setManualUsername] = useState('')
   const [status, setStatus] = useState('idle') // idle | submitting | success | error
+  const [checkins, setCheckins] = useState([])
+  const [feedLoading, setFeedLoading] = useState(false)
+  const [feedError, setFeedError] = useState(null)
 
   const isLoggedIn = !!profile
+
+  const loadFeed = useCallback(async () => {
+    if (!config.sheetId) return
+    setFeedLoading(true)
+    setFeedError(null)
+    try {
+      const data = await fetchCheckins(config.sheetId)
+      setCheckins(data)
+    } catch (e) {
+      setFeedError('無法載入動態，請確認試算表已發佈到網路')
+    } finally {
+      setFeedLoading(false)
+    }
+  }, [config.sheetId])
+
+  useEffect(() => { loadFeed() }, [loadFeed])
+
+  function handleLogin() {
+    liff.login({ redirectUri: window.location.href })
+  }
 
   function submitViaIframe(actionUrl, fields) {
     const iframe = document.createElement('iframe')
@@ -37,10 +78,6 @@ export default function CheckinPage({ profile, config, configParam }) {
     }, 3000)
   }
 
-  function handleLogin() {
-    liff.login({ redirectUri: window.location.href })
-  }
-
   async function handleCheckin() {
     if (!location.trim()) return
     setStatus('submitting')
@@ -64,6 +101,8 @@ export default function CheckinPage({ profile, config, configParam }) {
     try {
       submitViaIframe(config.actionUrl, fields)
       setStatus('success')
+      // Reload feed after a short delay to let Google Sheets update
+      setTimeout(() => loadFeed(), 3000)
     } catch {
       setStatus('error')
     }
@@ -140,20 +179,61 @@ export default function CheckinPage({ profile, config, configParam }) {
           <p className="error">送出失敗，請確認網路連線後再試</p>
         )}
 
-        <button
-          className="btn-checkin"
-          onClick={handleCheckin}
-          disabled={!location.trim() || status === 'submitting'}
-        >
-          {status === 'submitting' ? '打卡中...' : 'Check In'}
-        </button>
-
-        {isLoggedIn && (
-          <button className="btn-share" onClick={handleShare}>
-            分享打卡連結給朋友
-          </button>
+        {isLoggedIn ? (
+          <>
+            <button
+              className="btn-checkin"
+              onClick={handleCheckin}
+              disabled={!location.trim() || status === 'submitting'}
+            >
+              {status === 'submitting' ? '打卡中...' : 'Check In'}
+            </button>
+            <button className="btn-share" onClick={handleShare}>
+              分享打卡連結給朋友
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              className="btn-checkin"
+              onClick={handleCheckin}
+              disabled={!location.trim() || status === 'submitting'}
+            >
+              {status === 'submitting' ? '打卡中...' : 'Check In'}
+            </button>
+            <button className="btn-primary" onClick={handleLogin}>
+              使用 LINE 登入
+            </button>
+          </>
         )}
       </div>
+
+      {config.sheetId && (
+        <div className="card" style={{ marginTop: '16px' }}>
+          <div className="feed-header">
+            <h2>打卡動態</h2>
+            <button className="btn-refresh" onClick={loadFeed} disabled={feedLoading}>
+              {feedLoading ? '載入中...' : '重新整理'}
+            </button>
+          </div>
+
+          {feedError && <p className="error">{feedError}</p>}
+
+          {!feedLoading && !feedError && checkins.length === 0 && (
+            <p className="muted">還沒有人打卡</p>
+          )}
+
+          <ul className="feed-list">
+            {checkins.map((row, i) => (
+              <li key={i} className="feed-item">
+                <span className="feed-name">{row['Username'] || row['username'] || '—'}</span>
+                <span className="feed-location">{row['Location'] || row['location'] || '—'}</span>
+                <span className="feed-time">{row['Timestamp'] || row['timestamp'] || row['時間戳記'] || ''}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   )
 }

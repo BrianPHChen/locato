@@ -2,7 +2,6 @@ import { useState } from 'react'
 import liff from '@line/liff'
 
 const FIELD_ORDER = ['User ID', 'Username', 'Timestamp', 'Location']
-const ENTRY_KEYS = ['entryUserId', 'entryUsername', 'entryTime', 'entryLocation']
 
 function parsePrefillUrl(rawUrl) {
   try {
@@ -24,8 +23,14 @@ function parsePrefillUrl(rawUrl) {
   }
 }
 
+function extractSheetId(url) {
+  const match = url.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/)
+  return match?.[1] ?? null
+}
+
 export default function SetupPage() {
   const [prefillUrl, setPrefillUrl] = useState('')
+  const [sheetUrl, setSheetUrl] = useState('')
   const [eventName, setEventName] = useState('')
   const [parseError, setParseError] = useState('')
   const [parsed, setParsed] = useState(null)
@@ -46,6 +51,7 @@ export default function SetupPage() {
 
   function handleGenerate() {
     if (!parsed) return
+    const sheetId = sheetUrl.trim() ? extractSheetId(sheetUrl.trim()) : null
     const config = {
       actionUrl: parsed.actionUrl,
       entryUserId: parsed.entries[0],
@@ -53,6 +59,7 @@ export default function SetupPage() {
       entryTime: parsed.entries[2],
       entryLocation: parsed.entries[3],
       eventName: eventName.trim(),
+      ...(sheetId && { sheetId }),
     }
     const encoded = btoa(JSON.stringify(config))
     const base = `${window.location.origin}${window.location.pathname}`
@@ -131,6 +138,17 @@ export default function SetupPage() {
                 onChange={(e) => setEventName(e.target.value)}
                 placeholder="例如：工程師聚會 2026"
               />
+            </div>
+
+            <div className="field">
+              <label>Google Sheet URL（選填，用於顯示打卡動態）</label>
+              <input
+                type="url"
+                value={sheetUrl}
+                onChange={(e) => setSheetUrl(e.target.value)}
+                placeholder="https://docs.google.com/spreadsheets/d/..."
+              />
+              <p className="field-hint">需先將試算表「發佈到網路」才能讀取資料</p>
             </div>
 
             <button className="btn-primary" onClick={handleGenerate}>

@@ -255,6 +255,74 @@ button:not(:disabled):active {
   font-weight: 600;
 }
 
+/* Feed */
+.feed-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.feed-header h2 {
+  margin: 0;
+}
+
+.btn-refresh {
+  background: none;
+  border: 1.5px solid #ddd;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  color: #555;
+}
+
+.btn-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.feed-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.feed-item {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: auto auto;
+  gap: 2px 8px;
+  padding: 12px;
+  background: #f9f9f9;
+  border-radius: 10px;
+}
+
+.feed-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #111;
+}
+
+.feed-location {
+  font-size: 0.9rem;
+  color: #555;
+  text-align: right;
+}
+
+.feed-time {
+  font-size: 0.78rem;
+  color: #999;
+  grid-column: 1 / -1;
+}
+
+.field-hint {
+  font-size: 0.78rem;
+  color: #999;
+  margin-top: 4px;
+}
+
 .success-icon {
   width: 64px;
   height: 64px;
